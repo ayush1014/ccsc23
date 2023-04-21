@@ -1,0 +1,39 @@
+import plotly.express as px
+import json
+from dash import Dash, html, dcc
+
+
+def filter_data(data_records,year,sex):
+    relevant_records = []
+    for item in data_records:
+        if item["Period"] == year and item["Dim1"] == sex:
+            relevant_records.append(item)
+    return relevant_records
+
+data = []
+with open("HALElifeExpectancyAtBirth.json") as json_file:
+    data = json.load(json_file)
+
+
+display_data = filter_data(data,2019,"Both sexes")
+
+fig = px.choropleth(display_data,locations="Location",locationmode="country names",color="First Tooltip",labels={'First Tooltip':'Life Expectancy (years)'},title="Healthy Life Expectancy at birth, 2019")
+fig.show()
+app = Dash(__name__)
+
+app.layout = html.Div(children = [
+    dcc.Markdown(
+        id = "title",
+        children = "## life expectancy"
+    ),
+
+    dcc.Graph(
+        id = "movie_sales_bar_graph",
+        # figure = px.bar(data,x="Title",y='World Sales (in $)',title="Movie Sales")
+        fig = px.choropleth(display_data,locations="Location",locationmode="country names",color="First Tooltip",labels={'First Tooltip':'Life Expectancy (years)'},title="Healthy Life Expectancy at birth, 2019")
+        # fig.show()
+    )
+])
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
